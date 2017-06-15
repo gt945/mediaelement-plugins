@@ -18,11 +18,11 @@ Object.assign(mejs.MepDefaults, {
 	 * [{name: 'Slow', value: '0.75'}, {name: 'Normal', value: '1.00'}, ...]
 	 * @type {{String[]|Object[]}}
 	 */
-	speeds: ['2.00', '1.50', '1.25', '1.00', '0.75'],
+	speeds: ['16', '8', '4', '2', '1'],
 	/**
 	 * @type {String}
 	 */
-	defaultSpeed: '1.00',
+	defaultSpeed: '1',
 	/**
 	 * @type {String}
 	 */
@@ -166,7 +166,7 @@ Object.assign(MediaElementPlayer.prototype, {
 				;
 
 				playbackSpeed = newSpeed;
-				media.playbackRate = parseFloat(newSpeed);
+				player.setSpeed(parseInt(newSpeed));
 				player.speedButton.querySelector('button').innerHTML = (getSpeedNameFromValue(newSpeed));
 				const selected = player.speedButton.querySelectorAll(`.${t.options.classPrefix}speed-selected`);
 				for (let i = 0, total = selected.length; i < total; i++) {
@@ -198,7 +198,7 @@ Object.assign(MediaElementPlayer.prototype, {
 
 		media.addEventListener('loadedmetadata', () => {
 			if (playbackSpeed) {
-				media.playbackRate = parseFloat(playbackSpeed);
+				player.setSpeed(parseInt(playbackSpeed));
 			}
 		});
 	},

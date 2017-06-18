@@ -20,11 +20,11 @@ Object.assign(mejs.MepDefaults, {
   * [{name: 'Slow', value: '0.75'}, {name: 'Normal', value: '1.00'}, ...]
   * @type {{String[]|Object[]}}
   */
-	speeds: ['2.00', '1.50', '1.25', '1.00', '0.75'],
+	speeds: ['16', '8', '4', '2', '1'],
 	/**
   * @type {String}
   */
-	defaultSpeed: '1.00',
+	defaultSpeed: '1',
 	/**
   * @type {String}
   */
@@ -48,7 +48,7 @@ Object.assign(MediaElementPlayer.prototype, {
   */
 	buildspeed: function buildspeed(player, controls, layers, media) {
 		var t = this,
-		    isNative = t.media.rendererName !== null && /(native|html5)/i.test(t.media.rendererName);
+		    isNative = t.media.rendererName !== null && /(native|html5|vod)/i.test(t.media.rendererName);
 
 		if (!isNative) {
 			return;
@@ -148,7 +148,7 @@ Object.assign(MediaElementPlayer.prototype, {
 				    newSpeed = self.value;
 
 				playbackSpeed = newSpeed;
-				media.playbackRate = parseFloat(newSpeed);
+				media.playbackRate = parseInt(newSpeed);
 				player.speedButton.querySelector('button').innerHTML = getSpeedNameFromValue(newSpeed);
 				var selected = player.speedButton.querySelectorAll("." + t.options.classPrefix + "speed-selected");
 				for (var _i5 = 0, _total5 = selected.length; _i5 < _total5; _i5++) {
@@ -182,7 +182,7 @@ Object.assign(MediaElementPlayer.prototype, {
 
 		media.addEventListener('loadedmetadata', function () {
 			if (playbackSpeed) {
-				media.playbackRate = parseFloat(playbackSpeed);
+				media.playbackRate = parseInt(playbackSpeed);
 			}
 		});
 	},

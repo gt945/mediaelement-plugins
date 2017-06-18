@@ -47,7 +47,7 @@ Object.assign(MediaElementPlayer.prototype, {
 	buildspeed (player, controls, layers, media)  {
 		const
 			t = this,
-			isNative = t.media.rendererName !== null && /(native|html5)/i.test(t.media.rendererName)
+			isNative = t.media.rendererName !== null && /(native|html5|vod)/i.test(t.media.rendererName)
 		;
 
 		if (!isNative) {
@@ -166,7 +166,7 @@ Object.assign(MediaElementPlayer.prototype, {
 				;
 
 				playbackSpeed = newSpeed;
-				player.setSpeed(parseInt(newSpeed));
+				media.playbackRate = parseInt(newSpeed);
 				player.speedButton.querySelector('button').innerHTML = (getSpeedNameFromValue(newSpeed));
 				const selected = player.speedButton.querySelectorAll(`.${t.options.classPrefix}speed-selected`);
 				for (let i = 0, total = selected.length; i < total; i++) {
@@ -198,7 +198,7 @@ Object.assign(MediaElementPlayer.prototype, {
 
 		media.addEventListener('loadedmetadata', () => {
 			if (playbackSpeed) {
-				player.setSpeed(parseInt(playbackSpeed));
+				media.playbackRate = parseInt(playbackSpeed);
 			}
 		});
 	},

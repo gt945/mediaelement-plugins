@@ -56,19 +56,19 @@ Object.assign(MediaElementPlayer.prototype, {
 						}
 						date.setSeconds(seekTime); // specify value for SECONDS here
 						gesture.seekTimeLayer.children[0].innerHTML = date.toISOString().substr(11, 8) + '<br>' + (ev.deltaX >= 0 ? '+' : '') + parseInt(ev.deltaX / 10);
+					} else {
+						gesture.seekTimeLayer.style.display = 'none';
 					}
 					break;
 				case "panend":
-					{
+					if (Math.abs(ev.deltaX) > 40 && Math.abs(ev.deltaY) < Math.abs(ev.deltaX)) {
 						var seekTo = gesture.seekTimeStart + ev.deltaX / 10;
 						gesture.seekTimeLayer.style.display = 'none';
 						gesture.seekTimeStart = -1;
-						if (Math.abs(player.getCurrentTime() - seekTo) > 1) {
-							player.setCurrentTime(seekTo);
-						}
-						player.play();
-						break;
+						player.setCurrentTime(seekTo);
 					}
+					player.play();
+					break;
 			}
 		});
 	},

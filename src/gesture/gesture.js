@@ -41,34 +41,35 @@ Object.assign(MediaElementPlayer.prototype, {
 		player.hammer = new Hammer(player.container, {threshold:50, direction:Hammer.DIRECTION_VERTICAL});
 		player.hammer.on('panstart panend panleft panright', function(ev) {
 			switch(ev.type) {
-				case "panstart":
-					gesture.seekTimeStart = player.getCurrentTime();
-					break;
-				case "panleft":
-				case "panright":
-					if (Math.abs(ev.deltaX) > 40 && Math.abs(ev.deltaY) < Math.abs(ev.deltaX)) {
-						player.pause();
-						player.showControls();
-						gesture.seekTimeLayer.style.display = 'block';
-						var date = new Date(null);
-						var seekTime = gesture.seekTimeStart + ev.deltaX / 10;
-						if (seekTime < 0) {
-							seekTime = 0;
-						}
-						date.setSeconds(seekTime); // specify value for SECONDS here
-						gesture.seekTimeLayer.children[0].innerHTML = date.toISOString().substr(11, 8) + '<br>' + (ev.deltaX >= 0 ? '+' : '') +  parseInt((ev.deltaX / 10));
+			case "panstart":
+				gesture.seekTimeStart = player.getCurrentTime();
+				break;
+			case "panleft":
+			case "panright":
+				if (Math.abs(ev.deltaX) > 40 && Math.abs(ev.deltaY) < Math.abs(ev.deltaX)) {
+					player.pause();
+					player.showControls();
+					gesture.seekTimeLayer.style.display = 'block';
+					var date = new Date(null);
+					var seekTime = gesture.seekTimeStart + ev.deltaX / 10;
+					if (seekTime < 0) {
+						seekTime = 0;
 					}
-					break;
-				case "panend": {
+					date.setSeconds(seekTime); // specify value for SECONDS here
+					gesture.seekTimeLayer.children[0].innerHTML = date.toISOString().substr(11, 8) + '<br>' + (ev.deltaX >= 0 ? '+' : '') +  parseInt((ev.deltaX / 10));
+				} else {
+					gesture.seekTimeLayer.style.display = 'none';
+				}
+				break;
+			case "panend":
+				if (Math.abs(ev.deltaX) > 40 && Math.abs(ev.deltaY) < Math.abs(ev.deltaX)) {
 					var seekTo = gesture.seekTimeStart + ev.deltaX / 10;
 					gesture.seekTimeLayer.style.display = 'none';
 					gesture.seekTimeStart = -1;
-					if (Math.abs(player.getCurrentTime() - seekTo) > 1) {
-						player.setCurrentTime(seekTo);
-					}
-					player.play();
-					break;
-                }
+					player.setCurrentTime(seekTo);
+				}
+				player.play();
+				break;
 			}
 		});
 	},

@@ -51,19 +51,19 @@ Object.assign(MediaElementPlayer.prototype, {
 					player.showControls();
 					gesture.seekTimeLayer.style.display = 'block';
 					var date = new Date(null);
-					var seekTime = gesture.seekTimeStart + ev.deltaX / 10;
+					var seekTime = gesture.seekTimeStart + ev.deltaX / 5;
 					if (seekTime < 0) {
 						seekTime = 0;
 					}
 					date.setSeconds(seekTime); // specify value for SECONDS here
-					gesture.seekTimeLayer.children[0].innerHTML = date.toISOString().substr(11, 8) + '<br>' + (ev.deltaX >= 0 ? '+' : '') +  parseInt((ev.deltaX / 10));
+					gesture.seekTimeLayer.children[0].innerHTML = date.toISOString().substr(11, 8) + '<br>' + (ev.deltaX >= 0 ? '+' : '') +  parseInt((ev.deltaX / 5));
 				} else {
 					gesture.seekTimeLayer.style.display = 'none';
 				}
 				break;
 			case "panend":
 				if (Math.abs(ev.deltaX) > 40 && Math.abs(ev.deltaY) < Math.abs(ev.deltaX)) {
-					var seekTo = gesture.seekTimeStart + ev.deltaX / 10;
+					var seekTo = gesture.seekTimeStart + ev.deltaX / 5;
 					gesture.seekTimeLayer.style.display = 'none';
 					gesture.seekTimeStart = -1;
 					player.setCurrentTime(seekTo);

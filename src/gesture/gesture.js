@@ -38,15 +38,15 @@ Object.assign(MediaElementPlayer.prototype, {
 		layers.insertBefore(gesture.seekTimeLayer, layers.querySelector("." + t.options.classPrefix + "overlay-play"));
 
 		
-		player.hammer = new Hammer(player.container, {threshold:50, direction:Hammer.DIRECTION_VERTICAL});
-		player.hammer.on('panstart panend panleft panright', function(ev) {
+		player.hammer = new Hammer(player.container, {threshold:50, direction:Hammer.DIRECTION_HORIZONTAL});
+		player.hammer.on('panstart panend pancancel panleft panright', function(ev) {
 			switch(ev.type) {
 			case "panstart":
 				gesture.seekTimeStart = player.getCurrentTime();
 				break;
 			case "panleft":
 			case "panright":
-				if (Math.abs(ev.deltaX) > 40 && Math.abs(ev.deltaY) < Math.abs(ev.deltaX)) {
+				if (Math.abs(ev.deltaX) > 40 && Math.abs(ev.deltaY) < Math.abs(ev.deltaX) && (ev.center.x !== 0 || ev.center.y !== 0)) {
 					player.pause();
 					player.showControls();
 					gesture.seekTimeLayer.style.display = 'block';
@@ -55,19 +55,20 @@ Object.assign(MediaElementPlayer.prototype, {
 					if (seekTime < 0) {
 						seekTime = 0;
 					}
-					date.setSeconds(seekTime); // specify value for SECONDS here
+					date.setSeconds(seekTime);
 					gesture.seekTimeLayer.children[0].innerHTML = date.toISOString().substr(11, 8) + '<br>' + (ev.deltaX >= 0 ? '+' : '') +  parseInt((ev.deltaX / 5));
 				} else {
 					gesture.seekTimeLayer.style.display = 'none';
 				}
 				break;
 			case "panend":
-				if (Math.abs(ev.deltaX) > 40 && Math.abs(ev.deltaY) < Math.abs(ev.deltaX)) {
+			case "pancancel":
+				if (ev.type == "panend" && Math.abs(ev.deltaX) > 40 && Math.abs(ev.deltaY) < Math.abs(ev.deltaX)) {
 					var seekTo = gesture.seekTimeStart + ev.deltaX / 5;
-					gesture.seekTimeLayer.style.display = 'none';
-					gesture.seekTimeStart = -1;
 					player.setCurrentTime(seekTo);
 				}
+				gesture.seekTimeLayer.style.display = 'none';
+				gesture.seekTimeStart = -1;
 				player.play();
 				break;
 			}

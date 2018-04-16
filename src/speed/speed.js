@@ -18,7 +18,7 @@ Object.assign(mejs.MepDefaults, {
 	 * [{name: 'Slow', value: '0.75'}, {name: 'Normal', value: '1.00'}, ...]
 	 * @type {{String[]|Object[]}}
 	 */
-	speeds: ['16', '8', '4', '2', '1'],
+	speeds: ['16', '8', '4', '2', '1.56', '1.25', '1'],
 	/**
 	 * @type {String}
 	 */
@@ -26,7 +26,7 @@ Object.assign(mejs.MepDefaults, {
 	/**
 	 * @type {String}
 	 */
-	speedChar: 'x',
+	speedChar: 'X',
 	/**
 	 * @type {?String}
 	 */
@@ -166,7 +166,7 @@ Object.assign(MediaElementPlayer.prototype, {
 				;
 
 				playbackSpeed = newSpeed;
-				media.playbackRate = parseInt(newSpeed);
+				media.playbackRate = parseFloat(newSpeed);
 				player.speedButton.querySelector('button').innerHTML = (getSpeedNameFromValue(newSpeed));
 				const selected = player.speedButton.querySelectorAll(`.${t.options.classPrefix}speed-selected`);
 				for (let i = 0, total = selected.length; i < total; i++) {
@@ -198,7 +198,7 @@ Object.assign(MediaElementPlayer.prototype, {
 
 		media.addEventListener('loadedmetadata', () => {
 			if (playbackSpeed) {
-				media.playbackRate = parseInt(playbackSpeed);
+				media.playbackRate = parseFloat(playbackSpeed);
 			}
 		});
 	},

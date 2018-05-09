@@ -56,7 +56,13 @@ Object.assign(MediaElementPlayer.prototype, {
 						seekTime = 0;
 					}
 					date.setSeconds(seekTime);
-					gesture.seekTimeLayer.children[0].innerHTML = date.toISOString().substr(11, 8) + '<br>' + (ev.deltaX >= 0 ? '+' : '') +  parseInt((ev.deltaX / 5));
+					let color = "black";
+					let buffered = player.node.getBuffered();
+					if (seekTime < buffered.start() || seekTime > buffered.end()) {
+						color = "red";
+					}
+					let delta = "<font color=" + color + ">" + (ev.deltaX >= 0 ? '+' : '') + parseInt((ev.deltaX / 5)) + "</font>";
+					gesture.seekTimeLayer.children[0].innerHTML = date.toISOString().substr(11, 8) + '<br>' + delta;
 				} else {
 					gesture.seekTimeLayer.style.display = 'none';
 				}

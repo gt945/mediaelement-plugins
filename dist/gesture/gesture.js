@@ -37,7 +37,12 @@ Object.assign(MediaElementPlayer.prototype, {
 
 		layers.insertBefore(gesture.seekTimeLayer, layers.querySelector("." + t.options.classPrefix + "overlay-play"));
 
-		player.hammer = new Hammer(player.container, { threshold: 50, direction: Hammer.DIRECTION_HORIZONTAL });
+		gesture.seekHandleLayer = document.createElement('div');
+		gesture.seekHandleLayer.className = t.options.classPrefix + "layer " + t.options.classPrefix + "overlay";
+		gesture.seekHandleLayer.style.display = 'block';
+		layers.insertBefore(gesture.seekHandleLayer, layers.querySelector("." + t.options.classPrefix + "overlay-play"));
+
+		player.hammer = new Hammer(gesture.seekHandleLayer, { threshold: 50, direction: Hammer.DIRECTION_HORIZONTAL });
 		player.hammer.on('panstart panend pancancel panleft panright', function (ev) {
 			switch (ev.type) {
 				case "panstart":

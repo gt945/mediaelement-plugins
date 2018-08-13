@@ -3,8 +3,7 @@
 /**
  * Toggle button
  *
- * This feature enables the displaying of a Toggle button in the control bar, which basically pauses the media and rewinds
- * it to the initial position.
+ * This feature enables the displaying of a Toggle button in the control bar, which basically hide or show video.
  */
 
 // Translations (English required)
@@ -29,7 +28,7 @@ Object.assign(MediaElementPlayer.prototype, {
 	 * @param {HTMLElement} layers
 	 * @param {HTMLElement} media
 	 */
-	buildtoggle (player)  {
+	buildtoggle (player) {
 		const
 			t = this,
 			toggleTitle = mejs.Utils.isString(t.options.toggleText) ? t.options.toggleText : mejs.i18n.t('mejs.toggle'),
@@ -41,12 +40,11 @@ Object.assign(MediaElementPlayer.prototype, {
 		t.addControlElement(button, 'toggle');
 
 		button.addEventListener('click', () => {
-			var ele = player.container.querySelector(`.${t.options.classPrefix}mediaelement`);
-			if (ele.style.display == 'none') {
-				ele.style.display = '';
+			if (mejs.Utils.hasClass(button, `${t.options.classPrefix}toggle_invisible`)) {
+				player.node.show();
 				mejs.Utils.removeClass(button, `${t.options.classPrefix}toggle_invisible`);
 			} else {
-				ele.style.display = 'none';
+				player.node.hide();
 				mejs.Utils.addClass(button, `${t.options.classPrefix}toggle_invisible`);
 			}
 		});

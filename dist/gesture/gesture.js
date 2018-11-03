@@ -80,7 +80,22 @@ Object.assign(MediaElementPlayer.prototype, {
 					gesture.seekTimeLayer.style.display = 'none';
 					gesture.seekTimeStart = -1;
 					player.play();
+					player.startControlsTimer(player.options.controlsTimeoutMouseEnter);
 					break;
+			}
+		});
+		player.hammer.on('tap', function () {
+			if (!player.options.alwaysShowControls) {
+				if (player.controlsAreVisible) {
+					player.hideControls(false);
+				} else {
+					if (player.controlsEnabled) {
+						player.showControls(false);
+						if (!player.options.alwaysShowControls) {
+							player.startControlsTimer(t.options.controlsTimeoutMouseEnter);
+						}
+					}
+				}
 			}
 		});
 	},

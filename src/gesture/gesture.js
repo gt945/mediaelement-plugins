@@ -43,7 +43,7 @@ Object.assign(MediaElementPlayer.prototype, {
 		layers.insertBefore(gesture.seekHandleLayer, layers.querySelector("." + t.options.classPrefix + "overlay-play"));
 		
 		player.hammer = new Hammer(gesture.seekHandleLayer, {threshold:50, direction:Hammer.DIRECTION_HORIZONTAL});
-		player.hammer.on('panstart panend pancancel panleft panright', function(ev) {
+		player.hammer.on('panstart panend pancancel panleft panright tap', function(ev) {
 			switch(ev.type) {
 			case "panstart":
 				gesture.seekTimeStart = player.getCurrentTime();
@@ -80,22 +80,24 @@ Object.assign(MediaElementPlayer.prototype, {
 				gesture.seekTimeLayer.style.display = 'none';
 				gesture.seekTimeStart = -1;
 				player.play();
-				player.startControlsTimer(player.options.controlsTimeoutMouseEnter);
+				if (!player.options.alwaysShowControls) {
+					player.startControlsTimer(player.options.controlsTimeoutMouseEnter);
+				}
 				break;
-			}
-		});
-		player.hammer.on('tap', function(){
-			if(!player.options.alwaysShowControls) {
-				if (player.controlsAreVisible) {
-					player.hideControls(false);
-				} else {
-					if (player.controlsEnabled) {
-						player.showControls(false);
-						if (!player.options.alwaysShowControls) {
-							player.startControlsTimer(t.options.controlsTimeoutMouseEnter);
+			case "tap":
+				if(!player.options.alwaysShowControls) {
+					if (player.controlsAreVisible) {
+						player.hideControls(false);
+					} else {
+						if (player.controlsEnabled) {
+							player.showControls(false);
+							if (!player.options.alwaysShowControls) {
+								player.startControlsTimer(t.options.controlsTimeoutMouseEnter);
+							}
 						}
 					}
 				}
+				break;
 			}
 		});
 	},

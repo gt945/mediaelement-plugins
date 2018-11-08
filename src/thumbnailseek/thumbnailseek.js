@@ -30,7 +30,7 @@ Object.assign(MediaElementPlayer.prototype, {
 	 * @param {HTMLElement} layers
 	 * @param {HTMLElement} media
 	 */
-	buildthumbnailseek (player, controls) {
+	buildthumbnailseek (player, controls, layers, media) {
 		const
 			t = this,
 			thumbnailseekTitle = mejs.Utils.isString(t.options.thumbnailseekText) ? t.options.thumbnailseekText : mejs.i18n.t('mejs.thumbnailseek'),
@@ -38,6 +38,7 @@ Object.assign(MediaElementPlayer.prototype, {
 		;
 		let thumbnailseek = player.thumbnailseek = {};
 		
+		thumbnailseek.thumbs = [];
 		let thumbnailBox = thumbnailseek.thumbnailBox = document.createElement('div');
 		thumbnailBox.className = t.options.classPrefix + "thumbnails-box ";
 		thumbnailBox.style.display = 'none';
@@ -52,6 +53,11 @@ Object.assign(MediaElementPlayer.prototype, {
 		button.innerHTML = `<button type="button" aria-controls="${t.id}" title="${thumbnailseekTitle}" aria-label="${thumbnailseekTitle}" tabindex="0"></button>`;
 		t.addControlElement(button, 'thumbnailseek');
 
+		if (player.container.offsetWidth < player.container.offsetHeight || player.container.offsetHeight < 240 * 3) {
+			t.options.imgwidth = 120;
+		} else {
+			t.options.imgwidth = 240;
+		}
 		let hammer = thumbnailseek.hammer = new Hammer(thumbnailseek.thumbnailBox, { direction: Hammer.DIRECTION_HORIZONTAL });
 		hammer.on('panstart panend pancancel panleft panright tap', function (ev) {
 			switch (ev.type) {
@@ -74,6 +80,11 @@ Object.assign(MediaElementPlayer.prototype, {
 						thumbnailseek.thumbnailBox.style.display = 'none';
 						player.setCurrentTime(thumbnailseek.thumbs[index].time);
 						player.play();
+						if(!player.options.alwaysShowControls) {
+							if (player.controlsAreVisible) {
+								player.startControlsTimer(t.options.controlsTimeoutMouseEnter);
+							}
+						}
 					}
 					break;
 			}
@@ -123,11 +134,16 @@ Object.assign(MediaElementPlayer.prototype, {
 
 		thumbnailseek.createItem = function(sec, cb) {
 			var src = player.node.thumbnail(sec);
-			if (src && sec > 0 && sec < player.getDuration()) {
+			if (src && sec >= 0 && sec <= player.getDuration()) {
 				var item = document.createElement('span');
 				var img = document.createElement('img');
 				img.setAttribute('width', t.options.imgwidth + 'px');
 				img.setAttribute('src', src);
+				img.onload=function(){
+					if (thumbnailBox.style.height == 0) {
+						thumbnailBox.style.height = img.height + 'px';
+					}
+				}
 				item.append(img);
 				cb(item);
 			}
@@ -153,17 +169,26 @@ Object.assign(MediaElementPlayer.prototype, {
 			});
 		}
 		
-		thumbnailseek.show = function(sec) {
-			thumbnailseek.thumbs = [];
-			thumbnailItems.style.left="0px";
-			while (thumbnailItems.firstChild) {
-				thumbnailItems.removeChild(thumbnailItems.firstChild);
-			}
-			
+		thumbnailseek.update = function() {
+			player.pause();
+			player.showControls();
+			var sec = parseInt(player.getCurrentTime());
 			var addNext = function() {
 				thumbnailseek.addjustOffset(addNext);
 			}
-			thumbnailseek.addRight(sec, addNext);
+			
+			if (thumbnailseek.thumbs.length && sec >= thumbnailseek.thumbs[0].time && sec <= thumbnailseek.thumbs[thumbnailseek.thumbs.length - 1].time) {
+				var offsetSec = sec - thumbnailseek.thumbs[0].time;
+				thumbnailItems.style.left=  - parseInt(offsetSec / t.options.interval) * t.options.imgwidth +"px";
+				thumbnailseek.addjustOffset(addNext);
+			} else {
+				thumbnailseek.thumbs = [];
+				while (thumbnailItems.firstChild) {
+					thumbnailItems.removeChild(thumbnailItems.firstChild);
+				}
+				thumbnailItems.style.left="0px";
+				thumbnailseek.addRight(sec, addNext);
+			}
 		}
 		
 		button.addEventListener('click', () => {
@@ -172,12 +197,21 @@ Object.assign(MediaElementPlayer.prototype, {
 				thumbnailseek.thumbnailBox.style.display = 'none';
 				player.play();
 			} else {
-				player.pause();
-				player.showControls();
 				thumbnailseek.thumbnailBox.style.display = 'block';
-				thumbnailseek.show(parseInt(player.getCurrentTime()));
+				thumbnailseek.update();
 			}
-			
+		});
+
+		media.addEventListener('play', () => {
+			if (thumbnailseek.thumbnailBox.style.display == 'block') {
+				thumbnailseek.update();
+			}
+		});
+
+		media.addEventListener('seeked', () => {
+			if (thumbnailseek.thumbnailBox.style.display == 'block') {
+				thumbnailseek.update();
+			}
 		});
 	}
 });

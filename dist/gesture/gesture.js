@@ -62,7 +62,7 @@ Object.assign(MediaElementPlayer.prototype, {
 						date.setSeconds(seekTime);
 						var color = "black";
 						var buffered = player.node.getBuffered();
-						if (seekTime < buffered.start() || seekTime > buffered.end()) {
+						if (seekTime < buffered.start(0) || seekTime > buffered.end(0)) {
 							color = "red";
 						}
 						var delta = "<font color=" + color + ">" + (ev.deltaX >= 0 ? '+' : '') + parseInt(ev.deltaX / 5) + "</font>";

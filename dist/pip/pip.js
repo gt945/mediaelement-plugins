@@ -34,6 +34,9 @@ Object.assign(MediaElementPlayer.prototype, {
 		var t = this,
 		    pipTitle = mejs.Utils.isString(t.options.pipText) ? t.options.pipText : mejs.i18n.t('mejs.pip'),
 		    button = document.createElement('div');
+		if (!document.pictureInPictureEnabled) {
+			return;
+		}
 		button.className = t.options.classPrefix + "button " + t.options.classPrefix + "pip-button " + t.options.classPrefix + "pip";
 		button.innerHTML = "<button type=\"button\" aria-controls=\"" + t.id + "\" title=\"" + pipTitle + "\" aria-label=\"" + pipTitle + "\" tabindex=\"0\"></button>";
 

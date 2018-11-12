@@ -46,7 +46,7 @@ Object.assign(MediaElementPlayer.prototype, {
 		var thumbnailItems = thumbnailseek.thumbnailItems = document.createElement('div');
 		thumbnailItems.className = t.options.classPrefix + "thumbnails-items";
 
-		thumbnailBox.append(thumbnailseek.thumbnailItems);
+		thumbnailBox.appendChild(thumbnailseek.thumbnailItems);
 		controls.insertBefore(thumbnailBox, controls.querySelector("." + t.options.classPrefix + "progress"));
 
 		button.className = t.options.classPrefix + "button " + t.options.classPrefix + "thumbnailseek-button " + t.options.classPrefix + "thumbnailseek";
@@ -143,14 +143,17 @@ Object.assign(MediaElementPlayer.prototype, {
 						thumbnailBox.style.height = img.height + 'px';
 					}
 				};
-				item.append(img);
+				img.onmousedown = function (e) {
+					if (e.preventDefault) e.preventDefault();
+				};
+				item.appendChild(img);
 				cb(item);
 			}
 		};
 
 		thumbnailseek.addRight = function (sec, cb) {
 			thumbnailseek.createItem(sec, function (item) {
-				thumbnailItems.append(item);
+				thumbnailItems.appendChild(item);
 				thumbnailseek.thumbs.push({ time: sec, item: item });
 				if (cb) {
 					cb();

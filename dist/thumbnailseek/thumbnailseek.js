@@ -17,8 +17,9 @@ Object.assign(mejs.MepDefaults, {
   * @type {?String}
   */
 	thumbnailseekText: null,
-	interval: 10,
-	imgwidth: 120
+	interval: 1,
+	imgwidth: 120,
+	intervalOptions: [5, 10, 30, 60, 120]
 });
 
 Object.assign(MediaElementPlayer.prototype, {
@@ -46,7 +47,36 @@ Object.assign(MediaElementPlayer.prototype, {
 		var thumbnailItems = thumbnailseek.thumbnailItems = document.createElement('div');
 		thumbnailItems.className = t.options.classPrefix + "thumbnails-items";
 
-		thumbnailBox.appendChild(thumbnailseek.thumbnailItems);
+		thumbnailBox.appendChild(thumbnailItems);
+
+		var thumbnailOptions = thumbnailseek.thumbnailOptions = document.createElement('div');
+		thumbnailOptions.className = t.options.classPrefix + "thumbnails-options";
+
+		var intervalD = thumbnailseek.intervalD = document.createElement('div');
+		intervalD.innerHTML = '-';
+		intervalD.addEventListener('click', function () {
+			if (t.options.interval > 0) {
+				t.options.interval--;
+				intervalV.innerHTML = t.options.intervalOptions[t.options.interval];
+				thumbnailseek.update(true);
+			}
+		});
+		var intervalV = thumbnailseek.intervalV = document.createElement('div');
+		intervalV.innerHTML = t.options.intervalOptions[t.options.interval];
+		var intervalI = thumbnailseek.intervalI = document.createElement('div');
+		intervalI.addEventListener('click', function () {
+			if (t.options.interval < t.options.intervalOptions.length - 1) {
+				t.options.interval++;
+				intervalV.innerHTML = t.options.intervalOptions[t.options.interval];
+				thumbnailseek.update(true);
+			}
+		});
+		intervalI.innerHTML = '+';
+		thumbnailOptions.appendChild(intervalD);
+		thumbnailOptions.appendChild(intervalV);
+		thumbnailOptions.appendChild(intervalI);
+
+		thumbnailBox.appendChild(thumbnailOptions);
 		controls.insertBefore(thumbnailBox, controls.querySelector("." + t.options.classPrefix + "progress"));
 
 		button.className = t.options.classPrefix + "button " + t.options.classPrefix + "thumbnailseek-button " + t.options.classPrefix + "thumbnailseek";
@@ -58,7 +88,7 @@ Object.assign(MediaElementPlayer.prototype, {
 		} else {
 			t.options.imgwidth = 240;
 		}
-		var hammer = thumbnailseek.hammer = new Hammer(thumbnailseek.thumbnailBox, { direction: Hammer.DIRECTION_HORIZONTAL });
+		var hammer = thumbnailseek.hammer = new Hammer(thumbnailseek.thumbnailItems, { direction: Hammer.DIRECTION_HORIZONTAL });
 		hammer.on('panstart panend pancancel panleft panright tap', function (ev) {
 			switch (ev.type) {
 				case "panstart":
@@ -90,7 +120,7 @@ Object.assign(MediaElementPlayer.prototype, {
 			}
 		});
 
-		thumbnailseek.addjustOffset = function (done, cb2) {
+		thumbnailseek.addjustOffset = function (next, adjust) {
 			var offset = parseInt(thumbnailItems.style.left);
 			var width = thumbnailItems.parentElement.offsetWidth;
 			var limit = thumbnailItems.offsetWidth;
@@ -103,8 +133,8 @@ Object.assign(MediaElementPlayer.prototype, {
 					thumbnailItems.removeChild(thumbs[0].item);
 					thumbs.shift();
 					thumbnailItems.style.left = parseInt(thumbnailItems.style.left) + t.options.imgwidth + 'px';
-					if (cb2) {
-						cb2(t.options.imgwidth);
+					if (adjust) {
+						adjust(t.options.imgwidth);
 					}
 				} else {
 					thumbnailItems.removeChild(thumbs[thumbs.length - 1].item);
@@ -113,19 +143,19 @@ Object.assign(MediaElementPlayer.prototype, {
 			}
 
 			if (thumbs.length * t.options.imgwidth + offset < width * 2) {
-				thumbnailseek.addRight(time_end + t.options.interval, function () {
-					if (done) {
-						done();
+				thumbnailseek.addRight(time_end + t.options.intervalOptions[t.options.interval], function () {
+					if (next) {
+						next();
 					}
 				});
 			} else if (offset + width * 2 > 0) {
-				thumbnailseek.addLeft(time_begin - t.options.interval, function () {
+				thumbnailseek.addLeft(time_begin - t.options.intervalOptions[t.options.interval], function () {
 					thumbnailItems.style.left = parseInt(thumbnailItems.style.left) - t.options.imgwidth + 'px';
-					if (cb2) {
-						cb2(-t.options.imgwidth);
+					if (adjust) {
+						adjust(-t.options.imgwidth);
 					}
-					if (done) {
-						done();
+					if (next) {
+						next();
 					}
 				});
 			}
@@ -140,7 +170,8 @@ Object.assign(MediaElementPlayer.prototype, {
 				img.setAttribute('src', src);
 				img.onload = function () {
 					if (thumbnailBox.style.height == 0) {
-						thumbnailBox.style.height = img.height + 'px';
+						thumbnailItems.style.height = img.height + 2 + 'px';
+						thumbnailBox.style.height = img.height + 62 + 'px';
 					}
 				};
 				img.onmousedown = function (e) {
@@ -171,25 +202,37 @@ Object.assign(MediaElementPlayer.prototype, {
 			});
 		};
 
-		thumbnailseek.update = function () {
+		thumbnailseek.update = function (refresh) {
+			var width = thumbnailItems.parentElement.offsetWidth;
 			player.pause();
 			player.showControls();
 			var sec = parseInt(player.getCurrentTime());
+
 			var addNext = function addNext() {
-				thumbnailseek.addjustOffset(addNext);
+				thumbnailseek.addjustOffset(addNext, null);
 			};
 
-			if (thumbnailseek.thumbs.length && sec >= thumbnailseek.thumbs[0].time && sec <= thumbnailseek.thumbs[thumbnailseek.thumbs.length - 1].time) {
-				var offsetSec = sec - thumbnailseek.thumbs[0].time;
-				thumbnailItems.style.left = -parseInt(offsetSec / t.options.interval) * t.options.imgwidth + "px";
-				thumbnailseek.addjustOffset(addNext);
-			} else {
+			var reset = function reset() {
 				thumbnailseek.thumbs = [];
 				while (thumbnailItems.firstChild) {
 					thumbnailItems.removeChild(thumbnailItems.firstChild);
 				}
-				thumbnailItems.style.left = "0px";
+				thumbnailItems.style.left = (width - t.options.imgwidth) / 2 + "px";
 				thumbnailseek.addRight(sec, addNext);
+			};
+
+			if (refresh) {
+				var index = parseInt((0 - thumbnailItems.offsetLeft + width / 2) / t.options.imgwidth);
+				var offset = index * t.options.imgwidth + thumbnailItems.offsetLeft - (width - t.options.imgwidth) / 2;
+				sec = thumbnailseek.thumbs[index].time;
+				reset();
+				thumbnailItems.style.left = thumbnailItems.offsetLeft + offset + "px";
+			} else if (thumbnailseek.thumbs.length && sec >= thumbnailseek.thumbs[0].time && sec <= thumbnailseek.thumbs[thumbnailseek.thumbs.length - 1].time) {
+				var offsetSec = sec - thumbnailseek.thumbs[0].time;
+				thumbnailItems.style.left = (width - t.options.imgwidth) / 2 - parseInt(offsetSec / t.options.intervalOptions[t.options.interval]) * t.options.imgwidth + "px";
+				thumbnailseek.addjustOffset(addNext, null);
+			} else {
+				reset();
 			}
 		};
 

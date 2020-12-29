@@ -3,7 +3,7 @@
 /**
  * ThumbnailSeek button
  *
- * This feature enables the seeking by thumbnail feature 
+ * This feature enables the seeking by thumbnail feature
  */
 
 // Translations (English required)
@@ -38,7 +38,7 @@ Object.assign(MediaElementPlayer.prototype, {
 			button = document.createElement('div')
 		;
 		let thumbnailseek = player.thumbnailseek = {};
-		
+
 		thumbnailseek.thumbs = [];
 		let thumbnailBox = thumbnailseek.thumbnailBox = document.createElement('div');
 		thumbnailBox.className = t.options.classPrefix + "thumbnails-box ";
@@ -123,7 +123,7 @@ Object.assign(MediaElementPlayer.prototype, {
 					break;
 			}
 		});
-		
+
 		thumbnailseek.addjustOffset = function(next, adjust) {
 			var offset = parseInt(thumbnailItems.style.left);
 			var width = thumbnailItems.parentElement.offsetWidth;
@@ -131,7 +131,7 @@ Object.assign(MediaElementPlayer.prototype, {
 			var thumbs = thumbnailseek.thumbs;
 			var time_begin = thumbs[0].time;
 			var time_end = thumbs[thumbs.length - 1].time;
-			
+
 			if ((thumbs.length + 1) * t.options.imgwidth > limit) {
 				if (offset + limit < limit / 2) {
 					thumbnailItems.removeChild(thumbs[0].item);
@@ -144,7 +144,7 @@ Object.assign(MediaElementPlayer.prototype, {
 					thumbnailItems.removeChild(thumbs[thumbs.length - 1].item);
 					thumbs.pop();
 				}
-				
+
 			}
 
 			if (thumbs.length * t.options.imgwidth + offset < width * 2) {
@@ -167,7 +167,7 @@ Object.assign(MediaElementPlayer.prototype, {
 		}
 
 		thumbnailseek.createItem = function(sec, cb) {
-			var src = player.node.thumbnail(sec);
+			var src = t.options.thumbnailCmd(sec);
 			if (src && sec >= 0 && sec <= player.getDuration()) {
 				var item = document.createElement('span');
 				var img = document.createElement('img');
@@ -199,7 +199,7 @@ Object.assign(MediaElementPlayer.prototype, {
 				}
 			});
 		}
-		
+
 		thumbnailseek.addLeft = function(sec, cb) {
 			thumbnailseek.createItem(sec, function(item){
 				thumbnailItems.insertBefore(item, thumbnailItems.firstChild);
@@ -209,7 +209,7 @@ Object.assign(MediaElementPlayer.prototype, {
 				}
 			});
 		}
-		
+
 		thumbnailseek.update = function(refresh) {
 			var width = thumbnailItems.parentElement.offsetWidth;
 			player.pause();
@@ -228,7 +228,7 @@ Object.assign(MediaElementPlayer.prototype, {
 				thumbnailItems.style.left= (width - t.options.imgwidth) / 2 + "px";
 				thumbnailseek.addRight(sec, addNext);
 			}
-			
+
 			if (refresh) {
 				var index = parseInt((0 - thumbnailItems.offsetLeft + width / 2) / t.options.imgwidth );
 				var offset = index * t.options.imgwidth + thumbnailItems.offsetLeft - (width - t.options.imgwidth) / 2;
@@ -243,7 +243,7 @@ Object.assign(MediaElementPlayer.prototype, {
 				reset();
 			}
 		}
-		
+
 		button.addEventListener('click', () => {
 			//var ele = player.container.querySelector(`.${t.options.classPrefix}mediaelement`);
 			if (thumbnailseek.thumbnailBox.style.display == 'block') {

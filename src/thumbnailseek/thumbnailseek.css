@@ -21,6 +21,10 @@
     height: 100%;
 }
 
+.mejs__thumbnails-items > span > div {
+    color: white;
+    text-align: center;
+}
 .mejs__thumbnails-items img {
     user-drag: none;
     user-select: none;
@@ -31,8 +35,8 @@
     padding: 1px;
 }
 .mejs__thumbnails-options {
-    margin: auto;
-    width: 180px;
+    margin: 30px auto;
+    width: 124px;
     text-align: center;
     vertical-align: middle;
 }
@@ -42,8 +46,8 @@
     font-size: 20px;
     width: 60px;
     float: left;
-    height: 60px;
+    height: 40px;
     vertical-align: middle;
-    line-height: 60px;
+    line-height: 40px;
 }
 

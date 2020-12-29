@@ -53,7 +53,8 @@ Object.assign(MediaElementPlayer.prototype, {
 		thumbnailOptions.className = t.options.classPrefix + "thumbnails-options";
 
 
-		let intervalD = thumbnailseek.intervalD = document.createElement('div');
+		let intervalD = thumbnailseek.intervalD = document.createElement('button');
+		intervalD.className = t.options.classPrefix + "button ";
 		intervalD.innerHTML = '-';
 		intervalD.addEventListener('click', () => {
 			if (t.options.interval > 0) {
@@ -64,22 +65,24 @@ Object.assign(MediaElementPlayer.prototype, {
 		});
 		let intervalV = thumbnailseek.intervalV = document.createElement('div');
 		intervalV.innerHTML = t.options.intervalOptions[t.options.interval];
-		let intervalI = thumbnailseek.intervalI = document.createElement('div');
+		let intervalI = thumbnailseek.intervalI = document.createElement('button');
+		intervalI.className = t.options.classPrefix + "button ";
+		intervalI.innerHTML = '+';
 		intervalI.addEventListener('click', () => {
 			if (t.options.interval < t.options.intervalOptions.length - 1) {
 				t.options.interval++;
 				intervalV.innerHTML = t.options.intervalOptions[t.options.interval];
 				thumbnailseek.update(true);
-			} 
+			}
 		});
-		intervalI.innerHTML = '+';
+
 		thumbnailOptions.appendChild(intervalD);
 		thumbnailOptions.appendChild(intervalV);
 		thumbnailOptions.appendChild(intervalI);
 
 		thumbnailBox.appendChild(thumbnailOptions);
 		controls.insertBefore(thumbnailBox, controls.querySelector("." + t.options.classPrefix + "progress"));
-		
+
 		button.className = `${t.options.classPrefix}button ${t.options.classPrefix}thumbnailseek-button ${t.options.classPrefix}thumbnailseek`;
 		button.innerHTML = `<button type="button" aria-controls="${t.id}" title="${thumbnailseekTitle}" aria-label="${thumbnailseekTitle}" tabindex="0"></button>`;
 		t.addControlElement(button, 'thumbnailseek');
@@ -172,18 +175,21 @@ Object.assign(MediaElementPlayer.prototype, {
 				img.setAttribute('src', src);
 				img.onload=function(){
 					if (thumbnailBox.style.height == 0) {
-						thumbnailItems.style.height = (img.height + 2) + 'px';
-						thumbnailBox.style.height = (img.height + 62) + 'px';
+						thumbnailItems.style.height = (img.height + 22) + 'px';
+						thumbnailBox.style.height = (img.height + 102) + 'px';
 					}
 				}
 				img.onmousedown=function(e){
 					if (e.preventDefault) e.preventDefault();
 				}
 				item.appendChild(img);
+				var timecode = document.createElement('div');
+				timecode.innerHTML = mejs.Utils.secondsToTimeCode(sec, true, player.options.showTimecodeFrameCount, player.options.framesPerSecond)
+				item.appendChild(timecode);
 				cb(item);
 			}
 		}
-		
+
 		thumbnailseek.addRight = function(sec, cb) {
 			thumbnailseek.createItem(sec, function(item){
 				thumbnailItems.appendChild(item);

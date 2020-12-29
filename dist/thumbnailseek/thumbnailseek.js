@@ -165,7 +165,7 @@ Object.assign(MediaElementPlayer.prototype, {
 		};
 
 		thumbnailseek.createItem = function (sec, cb) {
-			var src = player.node.thumbnail(sec);
+			var src = t.options.thumbnailCmd(sec);
 			if (src && sec >= 0 && sec <= player.getDuration()) {
 				var item = document.createElement('span');
 				var img = document.createElement('img');

@@ -59,13 +59,17 @@ Object.assign(MediaElementPlayer.prototype, {
 			player.setCurrentTime(cutter.stop);
 		});
 
+		cutter.update = function () {
+			gotoStart.innerHTML = mejs.Utils.secondsToTimeCode(cutter.start, true, player.options.showTimecodeFrameCount, player.options.framesPerSecond);
+			gotoStop.innerHTML = mejs.Utils.secondsToTimeCode(cutter.stop, true, player.options.showTimecodeFrameCount, player.options.framesPerSecond);
+		};
 		var buttonStart = cutter.buttonStart = document.createElement('button');
 		buttonStart.className = t.options.classPrefix + "button ";
 		buttonStart.innerHTML = '^';
 		buttonStart.style.width = "40px";
 		buttonStart.addEventListener('click', function () {
 			cutter.start = player.getCurrentTime();
-			gotoStart.innerHTML = mejs.Utils.secondsToTimeCode(cutter.start, true, player.options.showTimecodeFrameCount, player.options.framesPerSecond);
+			cutter.update();
 		});
 
 		var buttonStop = cutter.buttonStop = document.createElement('button');
@@ -74,7 +78,7 @@ Object.assign(MediaElementPlayer.prototype, {
 		buttonStop.style.width = "40px";
 		buttonStop.addEventListener('click', function () {
 			cutter.stop = player.getCurrentTime();
-			gotoStop.innerHTML = mejs.Utils.secondsToTimeCode(cutter.stop, true, player.options.showTimecodeFrameCount, player.options.framesPerSecond);
+			cutter.update();
 		});
 
 		var buttonCut = cutter.buttonCut = document.createElement('button');
@@ -82,29 +86,64 @@ Object.assign(MediaElementPlayer.prototype, {
 		buttonCut.innerHTML = '>';
 		buttonCut.style.width = "120px";
 		buttonCut.addEventListener('click', function () {
-			if (cutter.start > 0 && cutter.stop > 0 && cutter.stop > cutter.start) {
+			if (cutter.start >= 0 && cutter.stop >= 0 && cutter.stop > cutter.start) {
 				var start = mejs.Utils.secondsToTimeCode(cutter.start, true, player.options.showTimecodeFrameCount, player.options.framesPerSecond);
 				var stop = mejs.Utils.secondsToTimeCode(cutter.stop - cutter.start, true, player.options.showTimecodeFrameCount, player.options.framesPerSecond);
 				mejs.Utils.ajax(t.options.cutterCmd(start, stop), 'get', function () {}, function () {});
 			}
 		});
 
+		var buttonLeft = cutter.buttonLeft = document.createElement('button');
+		buttonLeft.className = t.options.classPrefix + "button ";
+		buttonLeft.innerHTML = '-';
+		buttonLeft.style.width = "40px";
+		buttonLeft.addEventListener('click', function () {
+			var time = player.getCurrentTime();
+			time = time - 1;
+			if (time < 0) time = 0;
+			player.setCurrentTime(time);
+		});
+
+		var buttonRight = cutter.buttonLeft = document.createElement('button');
+		buttonRight.className = t.options.classPrefix + "button ";
+		buttonRight.innerHTML = '+';
+		buttonRight.style.width = "40px";
+		buttonRight.addEventListener('click', function () {
+			var time = player.getCurrentTime();
+			time = time + 1;
+			if (time > player.getDuration()) time = player.getDuration();
+			player.setCurrentTime(time);
+		});
+
+		var col1 = document.createElement('div');
+		var col2 = document.createElement('div');
+		var col3 = document.createElement('div');
+		var col4 = document.createElement('div');
 		var line1 = document.createElement('div');
 		var line2 = document.createElement('div');
-		var line3 = document.createElement('div');
-		line1.style.width = "50%";
-		line1.style.float = "left";
-		line2.style.width = "50%";
-		line2.style.float = "left";
+		col1.style.width = "25%";
+		col1.style.float = "left";
+		col2.style.width = "25%";
+		col2.style.float = "left";
+		col3.style.width = "25%";
+		col3.style.float = "left";
+		col4.style.width = "25%";
+		col4.style.float = "left";
+		line1.style.height = "100px";
 
-		line1.appendChild(gotoStart);
-		line1.appendChild(buttonStart);
-		line2.appendChild(gotoStop);
-		line2.appendChild(buttonStop);
-		line3.appendChild(buttonCut);
+		col1.appendChild(buttonLeft);
+		col2.appendChild(gotoStart);
+		col2.appendChild(buttonStart);
+		col3.appendChild(gotoStop);
+		col3.appendChild(buttonStop);
+		col4.appendChild(buttonRight);
+		line1.appendChild(col1);
+		line1.appendChild(col2);
+		line1.appendChild(col3);
+		line1.appendChild(col4);
+		line2.appendChild(buttonCut);
 		cutterBox.appendChild(line1);
 		cutterBox.appendChild(line2);
-		cutterBox.appendChild(line3);
 
 		controls.insertBefore(cutterBox, controls.querySelector("." + t.options.classPrefix + "progress"));
 
@@ -136,6 +175,8 @@ Object.assign(MediaElementPlayer.prototype, {
 				player.showControls();
 			}
 		});
+
+		cutter.update();
 	}
 });
 

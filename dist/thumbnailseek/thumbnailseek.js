@@ -4,7 +4,7 @@
 /**
  * ThumbnailSeek button
  *
- * This feature enables the seeking by thumbnail feature 
+ * This feature enables the seeking by thumbnail feature
  */
 
 // Translations (English required)
@@ -52,7 +52,8 @@ Object.assign(MediaElementPlayer.prototype, {
 		var thumbnailOptions = thumbnailseek.thumbnailOptions = document.createElement('div');
 		thumbnailOptions.className = t.options.classPrefix + "thumbnails-options";
 
-		var intervalD = thumbnailseek.intervalD = document.createElement('div');
+		var intervalD = thumbnailseek.intervalD = document.createElement('button');
+		intervalD.className = t.options.classPrefix + "button ";
 		intervalD.innerHTML = '-';
 		intervalD.addEventListener('click', function () {
 			if (t.options.interval > 0) {
@@ -63,7 +64,9 @@ Object.assign(MediaElementPlayer.prototype, {
 		});
 		var intervalV = thumbnailseek.intervalV = document.createElement('div');
 		intervalV.innerHTML = t.options.intervalOptions[t.options.interval];
-		var intervalI = thumbnailseek.intervalI = document.createElement('div');
+		var intervalI = thumbnailseek.intervalI = document.createElement('button');
+		intervalI.className = t.options.classPrefix + "button ";
+		intervalI.innerHTML = '+';
 		intervalI.addEventListener('click', function () {
 			if (t.options.interval < t.options.intervalOptions.length - 1) {
 				t.options.interval++;
@@ -71,7 +74,7 @@ Object.assign(MediaElementPlayer.prototype, {
 				thumbnailseek.update(true);
 			}
 		});
-		intervalI.innerHTML = '+';
+
 		thumbnailOptions.appendChild(intervalD);
 		thumbnailOptions.appendChild(intervalV);
 		thumbnailOptions.appendChild(intervalI);
@@ -170,14 +173,17 @@ Object.assign(MediaElementPlayer.prototype, {
 				img.setAttribute('src', src);
 				img.onload = function () {
 					if (thumbnailBox.style.height == 0) {
-						thumbnailItems.style.height = img.height + 2 + 'px';
-						thumbnailBox.style.height = img.height + 62 + 'px';
+						thumbnailItems.style.height = img.height + 22 + 'px';
+						thumbnailBox.style.height = img.height + 102 + 'px';
 					}
 				};
 				img.onmousedown = function (e) {
 					if (e.preventDefault) e.preventDefault();
 				};
 				item.appendChild(img);
+				var timecode = document.createElement('div');
+				timecode.innerHTML = mejs.Utils.secondsToTimeCode(sec, true, player.options.showTimecodeFrameCount, player.options.framesPerSecond);
+				item.appendChild(timecode);
 				cb(item);
 			}
 		};
